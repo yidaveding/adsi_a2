@@ -65,7 +65,7 @@ class PytorchDataset(Dataset):
     """
         
     def __init__(self, X, y):
-        self.X_tensor = self.to_tensor(X)
+        self.X_tensor = self.to_tensor(X.to_numpy())
         self.y_tensor = self.to_tensor(y)
     
     def __getitem__(self, index):
@@ -75,4 +75,5 @@ class PytorchDataset(Dataset):
         return len(self.X_tensor)
     
     def to_tensor(self, data):
-        return torch.Tensor(ndata)
+        return torch.Tensor(data)
+    
