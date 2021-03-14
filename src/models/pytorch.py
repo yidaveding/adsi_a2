@@ -69,12 +69,13 @@ class PytorchMCxlayers(nn.Module):
         forward() with inputs as input parameter, perform ReLU and DropOut on the fully-connected layer followed by the output layer with softmax
     """
 
-    def __init__(self, num_features=4, hlayer_neurons=512):
+    def __init__(self, device, num_features=4, hlayer_neurons=512):
         super(PytorchMCxlayers, self).__init__()
 
-        self.layer_1 = nn.Linear(num_features, hlayer_neurons).cuda()
-        self.layer_2 = nn.Linear(hlayer_neurons, hlayer_neurons).cuda()
-        self.layer_out = nn.Linear(hlayer_neurons, 104).cuda()
+        self.layer_1 = nn.Linear(num_features, hlayer_neurons).to(device)
+        self.layer_2 = nn.Linear(hlayer_neurons, hlayer_neurons).to(device)
+        self.layer_3 = nn.Linear(hlayer_neurons, hlayer_neurons).to(device)
+        self.layer_out = nn.Linear(hlayer_neurons, 104).to(device)
         self.softmax = nn.Softmax(dim=1)
         
         self.dropout = nn.Dropout(0.25)
@@ -83,6 +84,8 @@ class PytorchMCxlayers(nn.Module):
         x = F.relu(self.layer_1(x))
         x = self.dropout(x)
         x = F.relu(self.layer_2(x))
+        x = self.dropout(x)
+        x = F.relu(self.layer_3(x))
         x = self.dropout(x)
         return self.softmax(x)
 
@@ -182,7 +185,6 @@ def train_classification(train_data, model, criterion, optimizer, batch_size, de
         
         # Load data to specified device
         feature, target_class = feature.to(device), target_class.to(device)
-#         feature, target_class = feature, target_class
         
         # Make predictions
         output = model(feature)
