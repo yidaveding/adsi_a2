@@ -78,7 +78,7 @@ class PytorchMCxlayers(nn.Module):
         self.layer_out = nn.Linear(hlayer_neurons, 104).to(device)
         self.softmax = nn.Softmax(dim=1)
         
-        self.dropout = nn.Dropout(0.25)
+        self.dropout = nn.Dropout(0.5)
         
     def forward(self, x):
         x = F.relu(self.layer_1(x))
@@ -87,6 +87,7 @@ class PytorchMCxlayers(nn.Module):
         x = self.dropout(x)
         x = F.relu(self.layer_3(x))
         x = self.dropout(x)
+        x = F.relu(self.layer_out(x))
         return self.softmax(x)
 
     

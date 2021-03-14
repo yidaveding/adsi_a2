@@ -27,7 +27,7 @@ def load_data(raw_filepath=None, cleaned_filepath=None):
         print('loading raw data')
         # select columns
         col_tar = ['beer_style']
-        # col_cat = ['brewery_name']
+        col_cat = ['brewery_name']
         col_num = ['review_aroma', 'review_appearance', 'review_palate', 'review_taste']
         
         # load data from csv
@@ -43,7 +43,7 @@ def load_data(raw_filepath=None, cleaned_filepath=None):
     
     return df_cleaned
 
-def scale_features(df, sc):
+def process_features(df, sc):
     """
     use provided scaler to scale cleansed data
     store fitted scaler into model folder
