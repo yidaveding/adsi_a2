@@ -47,15 +47,46 @@ class PytorchMC3layers(nn.Module):
     def __init__(self, num_features=4, layer2_neurons=512):
         super(PytorchMC3layers, self).__init__()
 
-        self.layer_1 = nn.Linear(num_features, layer2_neurons)
-        self.layer_out = nn.Linear(layer2_neurons, 104)
+        self.layer_1 = nn.Linear(num_features, layer2_neurons).cuda()
+        self.layer_out = nn.Linear(layer2_neurons, 104).cuda()
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         x = F.dropout(F.relu(self.layer_1(x)), training=self.training)
-        x = self.layer_out(x)
+        x = self.layer_out(x).cuda()
         return self.softmax(x)
 
+    
+class PytorchMCxlayers(nn.Module):
+    """
+    num_features as input parameter
+      attributes:
+        layer_1: fully-connected layer with 32 neurons
+        layer_out: fully-connected layer with 4 neurons
+        softmax: softmax function
+
+      methods:
+        forward() with inputs as input parameter, perform ReLU and DropOut on the fully-connected layer followed by the output layer with softmax
+    """
+
+    def __init__(self, num_features=4, hlayer_neurons=512):
+        super(PytorchMCxlayers, self).__init__()
+
+        self.layer_1 = nn.Linear(num_features, hlayer_neurons).cuda()
+        self.layer_2 = nn.Linear(hlayer_neurons, hlayer_neurons).cuda()
+        self.layer_out = nn.Linear(hlayer_neurons, 104).cuda()
+        self.softmax = nn.Softmax(dim=1)
+        
+        self.dropout = nn.Dropout(0.25)
+        
+    def forward(self, x):
+        x = F.relu(self.layer_1(x))
+        x = self.dropout(x)
+        x = F.relu(self.layer_2(x))
+        x = self.dropout(x)
+        return self.softmax(x)
+
+    
 def get_device():
     '''
       Set model to use the device available
@@ -65,6 +96,8 @@ def get_device():
     else:
         device = torch.device('cpu') # don't have GPU 
     return device
+
+
 
 
 class PytorchDataset(Dataset):
@@ -148,8 +181,8 @@ def train_classification(train_data, model, criterion, optimizer, batch_size, de
         optimizer.zero_grad()
         
         # Load data to specified device
-#         feature, target_class = feature.to(device), target_class.to(device)
-        feature, target_class = feature, target_class
+        feature, target_class = feature.to(device), target_class.to(device)
+#         feature, target_class = feature, target_class
         
         # Make predictions
         output = model(feature)

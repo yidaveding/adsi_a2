@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+import joblib
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 def split_data(df, target, randomstate=42, path='data/processed/'):
     """
@@ -25,3 +29,22 @@ def split_data(df, target, randomstate=42, path='data/processed/'):
       np.save(f'{path}y_test',  y_test)
 
     return X_train, X_val, X_test, y_train, y_val, y_test
+
+def model_test_case(model, device, aroma=33, appearance=18, palate=46, taste=1):
+    sc = joblib.load('models/standard_scaler.joblib')
+    enc = joblib.load('models/output_encoder.joblib')
+
+    obs = {
+            'review_aroma': [aroma],
+            'review_appearance': [appearance],
+            'review_palate': [palate],
+            'review_taste': [taste]
+        }
+
+    obsc = sc.transform(pd.DataFrame(obs))
+    obst = torch.from_numpy(obsc).float()
+    obst = obst.to(device)
+
+    pred = model(obst)
+    pred = pred.argmax(1).tolist()
+    print(enc.inverse_transform(pred))
